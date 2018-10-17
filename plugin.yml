@@ -1,10 +1,10 @@
 name: docker-build
 version: 0.0.1
 inputs:
-- name: FLOWCI_DOCKER_REGIRTY
+- name: FLOWCI_DOCKER_BUILD_PATH
   type: string
   required: true
-- name: FLOWCI_DOCKER_BUILD_PATH
+- name: FLOWCI_DOCKER_REGIRTY
   type: string
   required: true
 - name: FLOWCI_DOCKER_NAME
@@ -19,25 +19,28 @@ script: |
   BRANCH_PREFIX=$(echo $FLOWCI_GIT_BRANCH | awk -F/ '{print $1}')
   
   if [[ ${BRANCH_PREFIX} = 'master' ]]; then
-    IMAGE_BUILD_NAME=${FLOWCI_DOCKER_REGIRTY}/akey-gateway:master.${FLOWCI_JOB_BUILD_NUM}
+    DOCKER_TAG=master.${FLOWCI_JOB_BUILD_NUM}
   fi
 
   if [[ ${BRANCH_PREFIX} = 'develop' ]]; then
-    IMAGE_BUILD_NAME=${FLOWCI_DOCKER_REGIRTY}/akey-gateway:develop.${FLOWCI_JOB_BUILD_NUM}
+    DOCKER_TAG=develop.${FLOWCI_JOB_BUILD_NUM}
   fi
   
   if [[ ${BRANCH_PREFIX} = 'feature' ]]; then
     FEATURE_ID=$(echo $FLOWCI_GIT_BRANCH | awk -F/ '{print $2}')
-    IMAGE_BUILD_NAME=${FLOWCI_DOCKER_REGIRTY}/akey-gateway:feature.${FEATURE_ID}.${FLOWCI_JOB_BUILD_NUM}
+    DOCKER_TAG=feature.${FEATURE_ID}.${FLOWCI_JOB_BUILD_NUM}
   fi
 
-  IMAGE_LATEST_NAME=${FLOWCI_PRIVATE_DOCKER_REGIRTY}/akey-gateway:latest
+  IMAGE_BUILD=${FLOWCI_DOCKER_REGIRTY}/${FLOWCI_DOCKER_NAME}:${DOCKER_TAG}
+  IMAGE_LATEST=${FLOWCI_DOCKER_REGIRTY}/${FLOWCI_DOCKER_NAME}:latest
 
+  echo "Image: ${IMAGE_BUILD}"
+  echo "Image: ${IMAGE_LATEST}"
 
-  docker build -t ${IMAGE_LATEST_NAME} .
-  docker build -t ${IMAGE_BUILD_NAME} .
+  docker build -t ${IMAGE_BUILD} .
+  docker build -t ${IMAGE_LATEST} .
 
-  docker push ${IMAGE_LATEST_NAME}
-  docker push ${IMAGE_BUILD_NAME}
+  docker push ${IMAGE_BUILD}
+  docker push ${IMAGE_LATEST}
   
   echo '#################### FINISH ####################'
