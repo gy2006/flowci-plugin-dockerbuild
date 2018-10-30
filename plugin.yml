@@ -43,4 +43,6 @@ script: |
   docker push ${IMAGE_BUILD}
   docker push ${IMAGE_LATEST}
   
+  export PLUGIN_OUT_DOCKER_IMAGE=${IMAGE_BUILD}
+  
   echo '#################### FINISH ####################'
